@@ -10,16 +10,21 @@ screen_height = 900
 screen= pygame.display.set_mode((screen_width,screen_height))
 clock= pygame.time.Clock()
 running = True
-
+red = (255,0,0)
+green = (0,255,0)
 mouse_pos = mouse.get_pos()
+pygame.mouse.set_visible(False)
+
 
 class Circle:
-    def __init__(self, x, y, radius):
+    def __init__(self, x, y, radius, color):
         self.x = x
         self.y = y
         self.radius = radius
+        self.color = color
     def draw(self):
-        pygame.draw.circle(screen, (255,0,0),(self.x, self.y),self.radius)
+        pygame.draw.circle(screen, (self.color),(self.x, self.y),self.radius)
+    #Check if cursor is within circle
     def detect_mouse(self, mouse_pos):
         circle_center = (self.x, self.y)
         distance = pygame.math.Vector2(circle_center).distance_to(mouse_pos)
@@ -31,13 +36,17 @@ random_2x = random.randint(1,screen_width)
 random_2y = random.randint(1,screen_height)
 random_3x = random.randint(1,screen_width)
 random_3y = random.randint(1,screen_height)
-circle = Circle(random_x, random_y, circle_radius)
-circle2 = Circle(random_2x, random_2y, circle_radius)
-circle3 = Circle(random_3x, random_3y, circle_radius)
+circle = Circle(random_x, random_y, circle_radius, red)
+circle2 = Circle(random_2x, random_2y, circle_radius, red)
+circle3 = Circle(random_3x, random_3y, circle_radius, red)
+circle_cursor = Circle(circle.x, circle.y, 10, green)
 
 
 while running:
     mouse_pos = mouse.get_pos()
+    circle_cursor.x = mouse_pos[0]
+    circle_cursor.y = mouse_pos[1]
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running =  False
@@ -60,5 +69,6 @@ while running:
     circle.draw()
     circle2.draw()
     circle3.draw()
+    circle_cursor.draw()
     pygame.display.update()
     clock.tick(360)
