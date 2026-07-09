@@ -18,12 +18,13 @@ green = (0,255,0)
 white = (255,255,255)
 mouse_pos = mouse.get_pos()
 pygame.mouse.set_visible(False)
-
+hit_sfx = pygame.mixer.Sound('hitsfx.WAV')
 score = 0
 hard = 20
 easy = 70
 # Display font
 font = pygame.font.Font(None, 50)
+
 
 class Circle:
     def __init__(self, x, y, radius, color):
@@ -42,6 +43,9 @@ class Circle:
         self.radius += amount
         if self.radius <= 5:
             self.radius = 5
+    def sfx(self):
+        pygame.mixer.Sound.play(hit_sfx)
+
 circle_radius = 30
 circle_circumference = circle_radius * 2
 random_x = random.randint(circle_radius,screen_width)
@@ -78,6 +82,7 @@ while running:
                 random_y = random.randint(circle_circumference, screen_height- circle_circumference)
                 circle.x = random_x
                 circle.y = random_y
+                circle.sfx()
                 if circle.radius <= hard:
                     score += 200
                 elif circle.radius >= easy:
