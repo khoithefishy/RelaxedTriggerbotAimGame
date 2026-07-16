@@ -72,8 +72,8 @@ for i in range(3):
     random_y = random.randint(circle_radius, screen_height)
     circles.append(Circle(random_x, random_y, circle_radius, red))
 
-current_state= "ACTIVE"
-counter_even = 0
+current_state= True
+state = "ACTIVE"
 
 while running:
     mouse_pos = mouse.get_pos()
@@ -100,16 +100,17 @@ while running:
             if event.key == pygame.K_2:
                 circles.remove(circle)
             elif event.key == pygame.K_ESCAPE:
-                counter_even += 1
-                if counter_even % 2 == 1: # Odd = paused
-                    current_state = "PAUSED"
-                else:
-                    current_state = "ACTIVE" # even = active
+                    current_state = not current_state
+                    if not current_state:
+                        state = "PAUSED"
+                    else:
+                        state = "ACTIVE"
+
 
 
         screen.fill((0, 0, 0))
 
-        if current_state == "ACTIVE":
+        if state == "ACTIVE":
             for circle in circles:
                 circle.draw()
                 if circle.detect_mouse(mouse_pos):
@@ -127,7 +128,7 @@ while running:
             screen.blit(text_circle_size, (50, 60))
             screen.blit(text_difficulty, (50, 90))
 
-        if current_state == "PAUSED":
+        if state == "PAUSED":
             screen.fill(blue)
             text_paused = font.render('PAUSED', True, white)
             screen.blit(text_paused, screen_center)
