@@ -3,25 +3,30 @@ import pygame
 from pygame import mouse
 import random
 import ctypes
-
+import time
 # initialize screen
 pygame.init()
 pygame.font.init()
 pygame.display.set_caption("Relaxed Aim")
 screen_width = 1600
 screen_height = 900
+screen_center = (screen_width / 2, screen_height / 2)
 screen = pygame.display.set_mode((screen_width, screen_height))
 clock = pygame.time.Clock()
 running = True
+
 red = (255, 0, 0)
 green = (0, 255, 0)
 white = (255, 255, 255)
+blue = (0, 0, 139)
+
 mouse_pos = mouse.get_pos()
 pygame.mouse.set_visible(False)
 hit_sfx = pygame.mixer.Sound('hitsfx.WAV')
 score = 0
 hard = 20
 easy = 70
+
 # Display font
 font = pygame.font.Font(None, 30)
 
@@ -61,10 +66,14 @@ circle = Circle(random_x, random_y, circle_radius, red)
 circle_cursor = Circle(circle.x, circle.y, 10, green)
 circles = []
 
+
 for i in range(3):
     random_x = random.randint(circle_radius, screen_width)
     random_y = random.randint(circle_radius, screen_height)
     circles.append(Circle(random_x, random_y, circle_radius, red))
+
+current_state= "ACTIVE"
+counter_even = 0
 
 while running:
     mouse_pos = mouse.get_pos()
@@ -73,11 +82,13 @@ while running:
     random_x = random.randint(circle_circumference, screen_width - circle_circumference)
     random_y = random.randint(circle_circumference, screen_height - circle_circumference)
     for event in pygame.event.get():
+        text = font.render(f'Score: {score}', True, white)
+        text_circle_size = font.render(f'Size: {circle.radius}', True, white)
+        text_difficulty = font.render('Press 1,2 to increase/decrease circles.', True, white)
+
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
             if event.key == pygame.K_a:
                 for circle in circles:
                     circle.difficulty(5)
@@ -88,27 +99,40 @@ while running:
                 circles.append(Circle(random_x, random_y, circle.radius, red))
             if event.key == pygame.K_2:
                 circles.remove(circle)
-        for circle in circles:
-            if circle.detect_mouse(mouse_pos):
-                circle.x = random_x
-                circle.y = random_y
-                circle.sfx()
-                if circle.radius <= hard:
-                    score += 200
-                elif circle.radius >= easy:
-                    score += 50
+            elif event.key == pygame.K_ESCAPE:
+                counter_even += 1
+                if counter_even % 2 == 1: # Odd = paused
+                    current_state = "PAUSED"
                 else:
-                    score += 100
+                    current_state = "ACTIVE" # even = active
 
-    screen.fill((0, 0, 0))
-    for circle in circles:
-        circle.draw()
-    circle_cursor.draw()
-    text = font.render(f'Score: {score}', True, white)
-    text_circle_size = font.render(f'Size: {circle.radius}', True, white)
-    text_difficulty = font.render('Press 1,2 to increase/decrease circles.', True, white)
-    screen.blit(text, (50, 30))
-    screen.blit(text_circle_size, (50, 60))
-    screen.blit(text_difficulty, (50, 90))
-    pygame.display.update()
-    clock.tick(360)
+
+        screen.fill((0, 0, 0))
+
+        if current_state == "ACTIVE":
+            for circle in circles:
+                circle.draw()
+                if circle.detect_mouse(mouse_pos):
+                    circle.x = random_x
+                    circle.y = random_y
+                    circle.sfx()
+                    if circle.radius <= hard:
+                        score += 200
+                    elif circle.radius >= easy:
+                        score += 50
+                    else:
+                        score += 100
+
+            screen.blit(text, (50, 30))
+            screen.blit(text_circle_size, (50, 60))
+            screen.blit(text_difficulty, (50, 90))
+
+        if current_state == "PAUSED":
+            screen.fill(blue)
+            text_paused = font.render('PAUSED', True, white)
+            screen.blit(text_paused, screen_center)
+
+
+        circle_cursor.draw()
+        pygame.display.update()
+        clock.tick(360)
